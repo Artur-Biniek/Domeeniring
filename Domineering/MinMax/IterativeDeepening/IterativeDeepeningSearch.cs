@@ -1,50 +1,48 @@
 ﻿using Domineering.MinMax.Contracts;
 using System;
+using System.Diagnostics;
 
 namespace Domineering.MinMax.IterativeDeepening
 {
     public static class IterativeDeepeningSearch
     {
-        private const long LONG_TIME = 7 * 24 * 3600 * 1000;
-
-        public static IGameState Search(IGameState node, Player currentPlayer, int depth = int.MaxValue, long timeLimitInMs = LONG_TIME)
+        public static ISearchResult Search(IGameState node, Player currentPlayer, int depth = int.MaxValue, SearchParams? sp = null)
         {
-            var si = new SearchInfo()
-            {
-                Deadline = DateTime.Now + TimeSpan.FromMilliseconds(timeLimitInMs)
-            };
+            var searchParams = sp ?? SearchParams.Default;
 
             var start = DateTime.Now;
+            var nodes = 0;
 
             var negaMax = new NegaMax(currentPlayer);
 
-            SearchResult best = null;
-            var nodes = 0L;
+            ISearchResult lastResult = null;
+
             for (int curDepth = 1; curDepth <= depth; curDepth++)
             {
-                SearchResult curBest = negaMax.Search(node, currentPlayer, curDepth);
+                ISearchResult currentResult = negaMax.Search(node, currentPlayer, curDepth, searchParams);
 
-                if (curBest.TimedOut)
+                if (currentResult.TimedOut)
                 {
-                    Console.WriteLine("Timed out.");
+                    Debug.WriteLine("Timed out.");
                     break;
                 }
 
-                if (curBest.TotalNodesSearched > nodes)
+                if (currentResult.TotalNodesSearched > nodes)
                 {
-                    nodes = curBest.TotalNodesSearched;
+                    nodes = currentResult.TotalNodesSearched;
                 }
                 else
                 {
                     break;
                 }
 
-                best = curBest;
+                lastResult = currentResult;
             }
 
-            Console.WriteLine("In {0} visited {1} nodes. Last attempt {2}.", DateTime.Now - start, nodes, best.TotalNodesSearched);
+            Debug.WriteLine(string.Format("In {0} visited {1} nodes. Last attempt {2}.", DateTime.Now - start, lastResult.TotalNodesSearched, lastResult.TotalNodesSearched));
 
-            return best.GameState;
+
+            return lastResult;
         }
 
     }

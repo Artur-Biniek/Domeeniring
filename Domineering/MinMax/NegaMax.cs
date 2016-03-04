@@ -1,6 +1,7 @@
-﻿using Domineering.MinMax.Contracts;
+﻿using System;
+
+using Domineering.MinMax.Contracts;
 using Domineering.MinMax.Transpositions;
-using System;
 
 namespace Domineering.MinMax
 {
@@ -18,23 +19,17 @@ namespace Domineering.MinMax
             _transpositionTable = table;
         }
 
-        public SearchResult Search(IGameState node, Player player, int depth = POSINF, SearchInfo si = null)
+        public ISearchResult Search(IGameState node, Player player, int depth, SearchParams sp)
         {
-            var sinfo = si ?? new SearchInfo()
-            {
-                Deadline = DateTime.MaxValue
-            };
-
-            return Search(node, player, depth, NEGINF, POSINF, sinfo);
+            return Search(node, player, depth, NEGINF, POSINF, new SearchParamsInternal(sp, depth));
         }
 
-        private SearchResult Search(IGameState node, Player player, int depth, int a, int b, SearchInfo si)
+        private ISearchResult Search(IGameState node, Player player, int depth, int a, int b, SearchParamsInternal spi)
         {
             var alphaOrig = a;
 
-            si.NodesCount++;
-            si.TotalNodes++;
-            si.MaxDepthSearched++;
+            spi.NodesCount++;
+            spi.TotalNodesSearched++;
 
             if (_transpositionTable != null)
             {
@@ -44,7 +39,7 @@ namespace Domineering.MinMax
                     switch (ttEntry.Type)
                     {
                         case Transposition.TranspositionType.Exact:
-                            return new SearchResult(node, ttEntry.Value,si.TotalNodes);
+                            return new SearchResult(node, ttEntry.Value, spi);
                         case Transposition.TranspositionType.LowerBound:
                             a = Math.Max(a, ttEntry.Value);
                             break;
@@ -55,7 +50,7 @@ namespace Domineering.MinMax
 
                     if (a >= b)
                     {
-                        return new SearchResult(node, ttEntry.Value, si.TotalNodes);
+                        return new SearchResult(node, ttEntry.Value, spi);
                     }
                 }
             }
@@ -63,7 +58,7 @@ namespace Domineering.MinMax
             if (depth == 0 || node.IsTerminal)
             {
                 // Console.WriteLine(node.ToString());
-                return new SearchResult(node, node.GetValue(player), si.TotalNodes);
+                return new SearchResult(node, node.GetValue(player), spi);
             }
 
             var bestValue = int.MinValue;
@@ -71,17 +66,17 @@ namespace Domineering.MinMax
 
             foreach (var child in node.GetMoves(player))
             {
-                var negamaxNode = Search(child, OpponentOf(player), depth - 1, -b, -a, si);
+                var negamaxNode = Search(child, OpponentOf(player), depth - 1, -b, -a, spi);
 
                 if (negamaxNode.TimedOut) return negamaxNode;
 
-                if (si.NodesCount > si.NodesPerTimeCheck)
+                if (spi.NodesCount > spi.NodesPerTimeCheck)
                 {
-                    si.NodesCount = 0;
+                    spi.NodesCount = 0;
 
-                    if (DateTime.Now > si.Deadline)
-                    {                  
-                        return new SearchResult(negamaxNode.GameState, 0, si.TotalNodes, true);
+                    if (DateTime.Now > spi.Deadline)
+                    {
+                        return new SearchResult(negamaxNode.GameState, 0, spi, true);
                     }
                 }
 
@@ -123,7 +118,7 @@ namespace Domineering.MinMax
                 _transpositionTable.Store(node, ttEntry);
             }
 
-            return new SearchResult(bestNode, bestValue, si.TotalNodes);
+            return new SearchResult(bestNode, bestValue, spi);
         }
 
         private Player OpponentOf(Player player)
@@ -131,5 +126,40 @@ namespace Domineering.MinMax
             return player == Player.One ? Player.Two : Player.One;
         }
 
+        private class SearchParamsInternal
+        {
+            public SearchParamsInternal(SearchParams sp, int depth)
+            {
+                Deadline = sp.Deadline;
+                NodesPerTimeCheck = sp.NodesPerTimeCheck;
+                Depth = depth;
+            }
+
+            public readonly DateTime Deadline;
+
+            public readonly int NodesPerTimeCheck;
+
+            public readonly int Depth;
+
+            public int NodesCount;
+
+            public int TotalNodesSearched;
+        }
+
+        private sealed class SearchResult : ISearchResult
+        {
+            public SearchResult(IGameState gameState, int value, SearchParamsInternal psi, bool timedOut = false)
+            {
+                GameState = gameState;
+                Value = value;
+                TotalNodesSearched = psi.TotalNodesSearched;
+                TimedOut = timedOut;
+            }
+
+            public IGameState GameState { get; private set; }
+            public bool TimedOut { get; private set; }
+            public int TotalNodesSearched { get; private set; }
+            public int Value { get; private set; }
+        }
     }
 }
