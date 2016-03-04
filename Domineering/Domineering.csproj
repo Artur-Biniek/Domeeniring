@@ -43,7 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MinMax.cs" />
+    <Compile Include="MinMax\Contracts\IGameState.cs" />
+    <Compile Include="MinMax\IterativeDeepening\IterativeDeepeningSearch.cs" />
+    <Compile Include="MinMax\SearchInfo.cs" />
+    <Compile Include="MinMax\NegaMax.cs" />
+    <Compile Include="MinMax\Contracts\Player.cs" />
+    <Compile Include="MinMax\SearchResult.cs" />
+    <Compile Include="MinMax\Transpositions\Transposition.cs" />
+    <Compile Include="MinMax\Transpositions\TranspositionTable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
