@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Game\GameState.cs" />
     <Compile Include="MinMax\Contracts\IGameState.cs" />
     <Compile Include="MinMax\Contracts\ISearchResult.cs" />
     <Compile Include="MinMax\IterativeDeepening\IterativeDeepeningSearch.cs" />

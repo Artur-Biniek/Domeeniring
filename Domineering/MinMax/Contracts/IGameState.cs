@@ -6,9 +6,9 @@ namespace Domineering.MinMax.Contracts
     {
         bool IsTerminal { get; }
 
-        IEnumerable<IGameState> GetMoves(Player p);
+        IEnumerable<IGameState> GetMoves(Player player);
 
-        int GetValue(Player p);
+        int GetValue(Player player);
 
         Player CurrentPlayer { get; }
 

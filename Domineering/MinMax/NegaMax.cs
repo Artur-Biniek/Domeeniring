@@ -76,7 +76,7 @@ namespace Domineering.MinMax
 
                     if (DateTime.Now > spi.Deadline)
                     {
-                        return new SearchResult(negamaxNode.GameState, 0, spi, true);
+                        return new SearchResult(negamaxNode.GameState, 0, spi, timedOut: true);
                     }
                 }
 

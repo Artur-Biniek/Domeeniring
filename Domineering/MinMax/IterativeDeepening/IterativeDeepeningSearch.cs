@@ -1,6 +1,6 @@
-﻿using Domineering.MinMax.Contracts;
-using System;
+﻿using System;
 using System.Diagnostics;
+using Domineering.MinMax.Contracts;
 
 namespace Domineering.MinMax.IterativeDeepening
 {
@@ -11,7 +11,6 @@ namespace Domineering.MinMax.IterativeDeepening
             var searchParams = sp ?? SearchParams.Default;
 
             var start = DateTime.Now;
-            var nodes = 0;
 
             var negaMax = new NegaMax(currentPlayer);
 
@@ -19,20 +18,13 @@ namespace Domineering.MinMax.IterativeDeepening
 
             for (int curDepth = 1; curDepth <= depth; curDepth++)
             {
+                if (DateTime.Now > searchParams.Deadline) break;
+
                 ISearchResult currentResult = negaMax.Search(node, currentPlayer, curDepth, searchParams);
 
                 if (currentResult.TimedOut)
                 {
                     Debug.WriteLine("Timed out.");
-                    break;
-                }
-
-                if (currentResult.TotalNodesSearched > nodes)
-                {
-                    nodes = currentResult.TotalNodesSearched;
-                }
-                else
-                {
                     break;
                 }
 
