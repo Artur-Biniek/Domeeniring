@@ -10,8 +10,8 @@ namespace Domineering
     {
         static void Main(string[] args)
         {
-            var board = new GameState(4,5, Player.One);
-           
+            var board = new GameState(8, 8, Player.One);
+
             Console.WriteLine(board);
 
             var next = board;
@@ -20,8 +20,9 @@ namespace Domineering
             {
                 var start = DateTime.Now;
 
-               var res = IterativeDeepeningSearch.Search(next, next.CurrentPlayer, sp: new SearchParams(DateTime.Now.AddSeconds(3)));
-              // var res = (new NegaMax(next.CurrentPlayer)).Search(next, next.CurrentPlayer, int.MaxValue, SearchParams.Default);
+                var res = IterativeDeepeningSearch.Search(next, next.CurrentPlayer, sp: new SearchParams(DateTime.Now.AddSeconds(120),true));
+                //var res = (new NegaMax(next.CurrentPlayer)).Search(next, next.CurrentPlayer, int.MaxValue, SearchParams.Default);
+                //var res = (new NegaMax(next.CurrentPlayer)).Search(next, next.CurrentPlayer, int.MaxValue, new SearchParams(DateTime.MaxValue, true));
 
                 next = (GameState)res.GameState;
 
@@ -29,7 +30,7 @@ namespace Domineering
                 Console.WriteLine(next);
             }
 
-            
+
         }
     }
 }

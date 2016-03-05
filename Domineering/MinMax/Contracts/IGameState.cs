@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Domineering.MinMax.Contracts
 {
-    public interface IGameState
+    public interface IGameState : IComparable<IGameState>
     {
         bool IsTerminal { get; }
 

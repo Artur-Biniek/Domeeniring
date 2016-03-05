@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Domineering.MinMax.Contracts;
 
@@ -63,18 +64,41 @@ namespace Domineering.Game
         }
 
         public int GetValue(Player player)
-        {
+        {            
             if (GetIsTerminal(player))
             {
                 return -100;
             }
 
-            if (GetIsTerminal(GetOpponent(player)))
+            var other = GetOpponent(player);
+
+            if (GetIsTerminal(other))
             {
                 return 100;
             }
 
-            return 0;
+            return HeuristictPossibleMoves(player) - HeuristictPossibleMoves(other);
+        }
+
+        private int HeuristictPossibleMoves(Player player)
+        {
+            var cnt = 0;
+
+            int dx = player == Player.One ? 1 : 0;
+            int dy = player == Player.One ? 0 : 1;
+
+            for (int r = 0; r < Rows - dx; r++)
+            {
+                for (int c = 0; c < Cols - dy; c++)
+                {
+                    if (_board[r, c] == false && _board[r + dx, c + dy] == false)
+                    {
+                        cnt++;
+                    }
+                }
+            }
+
+            return cnt;
         }
 
         public override string ToString()
@@ -124,6 +148,11 @@ namespace Domineering.Game
             }
 
             return true;
+        }
+
+        public int CompareTo(IGameState other)
+        {
+            return GetValue(CurrentPlayer).CompareTo(other.GetValue(other.CurrentPlayer));
         }
     }
 }

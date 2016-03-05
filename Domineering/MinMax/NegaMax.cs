@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using Domineering.MinMax.Contracts;
 using Domineering.MinMax.Transpositions;
 
@@ -21,7 +22,7 @@ namespace Domineering.MinMax
 
         public ISearchResult Search(IGameState node, Player player, int depth, SearchParams sp)
         {
-            return Search(node, player, depth, NEGINF, POSINF, new SearchParamsInternal(sp, depth));
+            return Search(node, player, depth, NEGINF, POSINF, new SearchParamsInternal(sp));
         }
 
         private ISearchResult Search(IGameState node, Player player, int depth, int a, int b, SearchParamsInternal spi)
@@ -64,17 +65,24 @@ namespace Domineering.MinMax
             var bestValue = int.MinValue;
             IGameState bestNode = null;
 
-            foreach (var child in node.GetMoves(player))
+           var moves = new List<IGameState>(node.GetMoves(player));
+
+            if (spi.SP.OrderMoves)
+            {
+                moves.Sort();               
+            }
+
+            foreach (var child in moves)
             {
                 var negamaxNode = Search(child, OpponentOf(player), depth - 1, -b, -a, spi);
 
                 if (negamaxNode.TimedOut) return negamaxNode;
 
-                if (spi.NodesCount > spi.NodesPerTimeCheck)
+                if (spi.NodesCount > spi.SP.NodesPerTimeCheck)
                 {
                     spi.NodesCount = 0;
 
-                    if (DateTime.Now > spi.Deadline)
+                    if (DateTime.Now > spi.SP.Deadline)
                     {
                         return new SearchResult(negamaxNode.GameState, 0, spi, timedOut: true);
                     }
@@ -128,18 +136,12 @@ namespace Domineering.MinMax
 
         private class SearchParamsInternal
         {
-            public SearchParamsInternal(SearchParams sp, int depth)
+            public SearchParams SP { get; private set; }
+
+            public SearchParamsInternal(SearchParams sp)
             {
-                Deadline = sp.Deadline;
-                NodesPerTimeCheck = sp.NodesPerTimeCheck;
-                Depth = depth;
+                SP = sp;
             }
-
-            public readonly DateTime Deadline;
-
-            public readonly int NodesPerTimeCheck;
-
-            public readonly int Depth;
 
             public int NodesCount;
 
