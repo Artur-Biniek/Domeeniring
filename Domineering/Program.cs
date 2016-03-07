@@ -1,6 +1,5 @@
 ﻿using System;
 using Domineering.Game;
-using Domineering.MinMax;
 using Domineering.MinMax.Contracts;
 using Domineering.MinMax.IterativeDeepening;
 
@@ -10,27 +9,35 @@ namespace Domineering
     {
         static void Main(string[] args)
         {
-            var board = new GameState(8, 8, Player.One);
+            var player = Console.ReadLine() == "v" ? Player.One : Player.Two;
 
-            Console.WriteLine(board);
+            var board = new bool[8, 8];
 
-            var next = board;
-
-            while (!next.IsTerminal)
+            for (int line = 0; line < 8; line++)
             {
-                var start = DateTime.Now;
+                var str = Console.ReadLine().ToCharArray();
 
-                var res = IterativeDeepeningSearch.Search(next, next.CurrentPlayer, sp: new SearchParams(DateTime.Now.AddSeconds(120),true));
-                //var res = (new NegaMax(next.CurrentPlayer)).Search(next, next.CurrentPlayer, int.MaxValue, SearchParams.Default);
-                //var res = (new NegaMax(next.CurrentPlayer)).Search(next, next.CurrentPlayer, int.MaxValue, new SearchParams(DateTime.MaxValue, true));
-
-                next = (GameState)res.GameState;
-
-                Console.WriteLine("Player: {0}, Game Over: {1}, Searched nodes {2} in time {3}{4}.", next.CurrentPlayer, next.IsTerminal, res.TotalNodesSearched, DateTime.Now - start, res.TimedOut ? " (Timed Out)" : "");
-                Console.WriteLine(next);
+                for (int col = 0; col < 8; col++)
+                {
+                    board[line, col] = str[col] != '-';
+                }
             }
 
+            var game = new GameState(8, 8, board, player);
 
+
+            var res = IterativeDeepeningSearch.Search(game, game.CurrentPlayer, sp: new SearchParams(DateTime.Now.AddSeconds(2.7), true));
+
+            //Console.WriteLine(game);
+
+            //Console.WriteLine(res.GameState);
+
+            var move = ((GameState)res.GameState).LastMove;
+
+            Console.WriteLine("{0} {1}", move.Item1, move.Item2);
         }
+
+
     }
 }
+

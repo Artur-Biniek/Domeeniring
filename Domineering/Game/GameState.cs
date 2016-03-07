@@ -9,6 +9,10 @@ namespace Domineering.Game
     {
         private static StringBuilder _sb = new StringBuilder();
 
+        private static Random _rnd = new Random();
+
+        private int[,] _hashBases;
+
         bool[,] _board;
 
         public Player CurrentPlayer { get; private set; }
@@ -41,6 +45,29 @@ namespace Domineering.Game
             get { return GetIsTerminal(CurrentPlayer); }
         }
 
+        public Tuple<int, int> LastMove { get; private set; }
+
+        public void BuildHashBases()
+        {
+            HashSet<int> _numbers = new HashSet<int>();
+
+            while (_numbers.Count < Rows * Cols)
+            {
+                _numbers.Add(_rnd.Next(int.MaxValue));
+            }
+
+            var res = new List<int>(_numbers);
+            _hashBases = new int[Rows, Cols];
+
+            for (int r = 0; r < Rows; r++)
+            {
+                for (int c = 0; c < Cols; c++)
+                {
+                    _hashBases[r, c] = res[r * Rows + c];
+                }
+            }
+        }
+
         public GameState(int rows, int cols, Player currentPlayer)
             : this(rows, cols, new bool[rows, cols], currentPlayer)
         { }
@@ -61,10 +88,12 @@ namespace Domineering.Game
                     _board[r, c] = initialState[r, c];
                 }
             }
+
+            BuildHashBases();
         }
 
         public int GetValue(Player player)
-        {            
+        {
             if (GetIsTerminal(player))
             {
                 return -100;
@@ -129,6 +158,8 @@ namespace Domineering.Game
 
             nextGameState._board[r1, c1] = true;
             nextGameState._board[r2, c2] = true;
+
+            nextGameState.LastMove = Tuple.Create(r1, c1);
 
             return nextGameState;
         }

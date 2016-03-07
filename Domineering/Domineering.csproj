@@ -50,8 +50,6 @@
     <Compile Include="MinMax\Contracts\SearchParams.cs" />
     <Compile Include="MinMax\NegaMax.cs" />
     <Compile Include="MinMax\Contracts\Player.cs" />
-    <Compile Include="MinMax\Transpositions\Transposition.cs" />
-    <Compile Include="MinMax\Transpositions\TranspositionTable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
